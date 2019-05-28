@@ -14,13 +14,13 @@ Pao Pao Training Mode is a tool on top of Fightcade witch gives you Dummy contro
 
 ### Instructions ###
 1. Click on **Clone or Download** and **Download ZIP**
-2. Run run_iv.bat and test your controller inputs
+2. Run run_input_viewer.bat and test your controller inputs
 3. Report your controller inputs in input_map.ini **player 2 and "Stop" inputs must be letters (ex: Z for Up input)**
 
 ### Usage ###
 1. Run offline fightcade emulator, garou (in mvs only, press START+A+B+C in game to open unibios menu) and enable infinite power, infinite life and infinite time
 2. Chose P1 and P2 characters
-3. run run_ntm.bat and start training
+3. run run_pao_pao_training.bat and start training
 
 ### Default ini ###
 ```
