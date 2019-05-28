@@ -1,0 +1,1 @@
+start /B .\venv\Scripts\python.exe input_viewer.py %*
