@@ -1,7 +1,7 @@
-# Neo Geo Training Mode #
+# Pao Pao Training Mode #
 
 ## Getting Started ###
-Neo Geo Training Mode (NTM) is a tool on top of Fightcade witch gives you Dummy control and record/play features for Garou Mark Of The Wolves.
+Pao Pao Training Mode is a tool on top of Fightcade witch gives you Dummy control and record/play features for Garou Mark Of The Wolves.
 
 ### Prerequisites ###
 * Install [python 3.7](https://www.python.org/ftp/python/3.7.3/python-3.7.3.exe)
