@@ -52,4 +52,4 @@ play = ABS_Z
 ```
 
 ### NOTE: ###
-**This tool is in an early stage, tested only in windows 10 and i'm not a software developer**
+**This tool is in an early stage, tested only in windows 10 and i'm not a software developer. Feel free to improve it**
