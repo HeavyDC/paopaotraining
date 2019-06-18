@@ -22,12 +22,12 @@ Pao Pao Training Mode is a tool on top of Fightcade witch gives you Dummy contro
 2. Chose P1 and P2 characters
 3. run run_pao_pao_training.bat and start training
 
-### Default ini ###
+### input_map.ini ###
 ```
 [p1 controls]
 p1-up = ABS_HAT0Y
-p1-left = ABS_HAT0X
 p1-down = ABS_HAT0Y
+p1-left = ABS_HAT0X
 p1-right = ABS_HAT0X
 p1-a = BTN_WEST
 p1-b = BTN_SOUTH
@@ -37,8 +37,8 @@ p1-dummy = BTN_TR
 
 [p2 controls]
 p2-up = z
-p2-left = q
 p2-down = s
+p2-left = q
 p2-right = d
 p2-a = i
 p2-b = k
@@ -47,7 +47,7 @@ p2-d = l
 
 [record controls]
 record = BTN_TL
-stop = a
+stop = a # only keyboard letter working
 play = ABS_Z
 ```
 
