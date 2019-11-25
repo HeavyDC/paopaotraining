@@ -6,6 +6,7 @@ import keyboard
 import time
 import multiprocessing
 import configparser as cp
+from random import randint
 pyautogui.PAUSE = 0
 
 welcome = '''
@@ -13,8 +14,12 @@ Welcome to NeoGeo training mode
 Press dummy_control to take/stop control of P2
 Press dummy_record to record input
 Press dummy_play to play recorded inputs
+Press next_record to switch to the next record slot
+Press prev_record to switch to the previous record slot
 Quit NeoGeo training mode witch ctrl-pause
 '''
+# Nombre de slots d'enregistrement
+TOTAL_SLOTS = 3
 
 # Lecture fichier de conf
 config = cp.ConfigParser()
@@ -32,7 +37,6 @@ p1D = config.get('p1 controls', 'P1-D')
 p1Dummy = config.get('p1 controls', 'P1-dummy')
 
 # Variables p-2
-
 p2Up = config.get('p2 controls', 'P2-up')
 p2Down = config.get('p2 controls', 'P2-down')
 p2Left = config.get('p2 controls', 'P2-left')
@@ -46,7 +50,9 @@ p2D = config.get('p2 controls', 'P2-D')
 record = config.get('record controls', 'record')
 stop = config.get('record controls', 'stop')
 play = config.get('record controls', 'play')
-
+next_record = config.get('record controls', 'next_record')
+prev_record = config.get('record controls', 'prev_record')
+random_play = config.get('record controls', 'random_play')
 
 def p1_to_p2():
     while True:
@@ -124,18 +130,52 @@ def p1_to_p2():
                 p1_to_p2()
 
 def dummy_record():
+    current_slot = 0
+    record_slots = []
+    for i in range(0, TOTAL_SLOTS):
+        record_slots.append(0)
     while True:
         for event in get_gamepad():
             try:
                 if event.code == record and event.state > int(0):
                     print('Record P2')
                     print("Press the",stop, "button to quit record")
-                    recorded = keyboard.record(until=stop)
+                    record_slots[current_slot] = keyboard.record(until=stop)
+                    if len(record_slots[current_slot]) < 2:
+                        record_slots[current_slot] = 0
+                        print('Nothing recorded')
                     print('End record')
                 elif event.code == play and event.state > int(0):
-                    print('Start replay')
-                    keyboard.play(recorded)
-                    print('End replay')
+                    if record_slots[current_slot] != 0:
+                        print('Start replay', current_slot + 1)
+                        keyboard.play(record_slots[current_slot])
+                        print('End replay')
+                    else:
+                        print('This slot is empty')
+                elif event.code == random_play and event.state > int(0):
+                    found = False
+                    for i in range(0, TOTAL_SLOTS):
+                        if record_slots[i]:
+                            found = True
+                    if found:
+                        random_slot = randint(0, TOTAL_SLOTS-1)
+                        while not record_slots[random_slot]:
+                            random_slot = randint(0, TOTAL_SLOTS-1)
+                        print('Start random replay', random_slot + 1)
+                        keyboard.play(record_slots[random_slot])
+                        print('End replay')
+                    else:
+                        print('No slot is recorded')
+                elif event.code == prev_record and event.state > int(0):
+                    current_slot-=1
+                    if current_slot < 0:
+                        current_slot = TOTAL_SLOTS-1
+                    print('Switched to slot ', current_slot + 1)
+                elif event.code == next_record and event.state > int(0):
+                    current_slot+=1
+                    if current_slot > TOTAL_SLOTS-1:
+                        current_slot = 0
+                    print('Switched to slot ', current_slot + 1)
             except:
                 print("Nothing recorded")
                 pass
