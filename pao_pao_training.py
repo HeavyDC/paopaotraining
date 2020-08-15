@@ -3,56 +3,215 @@
 import pyautogui
 from inputs import get_gamepad
 import keyboard
-import time
 import multiprocessing
-import configparser as cp
-from random import randint
+import re
+import json
+
 pyautogui.PAUSE = 0
 
 welcome = '''
 Welcome to NeoGeo training mode
-Press dummy_control to take/stop control of P2
-Press dummy_record to record input
-Press dummy_play to play recorded inputs
-Press next_record to switch to the next record slot
-Press prev_record to switch to the previous record slot
+Press select to take/stop control of P2
+Press coin to start recording
+Press a to stop recording
+Press start to play recorded inputs
 Quit NeoGeo training mode witch ctrl-pause
 '''
-# Nombre de slots d'enregistrement
-TOTAL_SLOTS = 3
 
 # Lecture fichier de conf
-config = cp.ConfigParser()
-config.read('input_map.ini')
+with open('garou.ini') as file:
+    conf_content = file.readlines()
+# déclaration du fichier de conf de sortie
+conf_output = {}
 
-# Variables p-1
-p1Up = config.get('p1 controls', 'P1-up')
-p1Down = config.get('p1 controls', 'P1-down')
-p1Left = config.get('p1 controls', 'P1-left')
-p1Right = config.get('p1 controls', 'P1-right')
-p1A = config.get('p1 controls', 'P1-A')
-p1B = config.get('p1 controls', 'P1-B')
-p1C = config.get('p1 controls', 'P1-C')
-p1D = config.get('p1 controls', 'P1-D')
-p1Dummy = config.get('p1 controls', 'P1-dummy')
+# parsing du fichier de conf pour retirer le scancode et le nom de l'input
+for line in conf_content:
+    match = re.search("^input", line)
+    if match:
+        line_table = re.split(r"\s{2,}", line)
+        conf_output.update({line_table[1].replace("\"", ""): line_table[2].replace("\n", "").replace("switch ",
+                                                                                                     "").replace(
+            "constant ", "")})
 
-# Variables p-2
-p2Up = config.get('p2 controls', 'P2-up')
-p2Down = config.get('p2 controls', 'P2-down')
-p2Left = config.get('p2 controls', 'P2-left')
-p2Right = config.get('p2 controls', 'P2-right')
-p2A = config.get('p2 controls', 'P2-A')
-p2B = config.get('p2 controls', 'P2-B')
-p2C = config.get('p2 controls', 'P2-C')
-p2D = config.get('p2 controls', 'P2-D')
+json_db = '''{
+   "0x4005":"ABS_Z",
+   "0x4084":"BTN_TL",
+   "0x4087":"BTN_SELECT",
+   "0x4086":"BTN_START",
+   "0x4013":"ABS_HAT0Y",
+   "0x4012":"ABS_HAT0Y",
+   "0x4010":"ABS_HAT0X",
+   "0x4011":"ABS_HAT0X",
+   "0x4082":"BTN_WEST",
+   "0x4080":"BTN_SOUTH",
+   "0x4083":"BTN_NORTH",
+   "0x4081":"BTN_EAST",
+   "0x4085":"BTN_TR",
+   "0x4004":"ABS_RZ",
+   "0x01":"ESCAPE",
+   "0x02":"1",
+   "0x03":"2",
+   "0x04":"3",
+   "0x05":"4",
+   "0x06":"5",
+   "0x07":"6",
+   "0x08":"7",
+   "0x09":"8",
+   "0x0A":"9",
+   "0x0B":"0",
+   "0x0C":"MINUS",
+   "0x0D":"EQUALS",
+   "0x0E":"BACK",
+   "0x0F":"TAB",
+   "0x10":"q",
+   "0x11":"z",
+   "0x12":"e",
+   "0x13":"r",
+   "0x14":"t",
+   "0x15":"y",
+   "0x16":"u",
+   "0x17":"i",
+   "0x18":"o",
+   "0x19":"p",
+   "0x1A":"LBRACKET",
+   "0x1B":"RBRACKET",
+   "0x1C":"RETURN",
+   "0x1D":"LCONTROL",
+   "0x1E":"a",
+   "0x1F":"s",
+   "0x20":"d",
+   "0x21":"f",
+   "0x22":"g",
+   "0x23":"h",
+   "0x24":"j",
+   "0x25":"k",
+   "0x26":"l",
+   "0x27":"SEMICOLON",
+   "0x28":"APOSTROPHE",
+   "0x29":"GRAVE",
+   "0x2A":"LSHIFT",
+   "0x2B":"BACKSLASH",
+   "0x2C":"z",
+   "0x2D":"x",
+   "0x2E":"c",
+   "0x2F":"v",
+   "0x30":"b",
+   "0x31":"n",
+   "0x32":"m",
+   "0x33":"COMMA",
+   "0x34":"PERIOD",
+   "0x35":"SLASH",
+   "0x36":"RSHIFT",
+   "0x37":"MULTIPLY",
+   "0x38":"LMENU",
+   "0x39":"SPACE",
+   "0x3A":"CAPITAL",
+   "0x45":"NUMLOCK",
+   "0x46":"SCROLL",
+   "0x47":"NUMPAD7",
+   "0x48":"NUMPAD8",
+   "0x49":"NUMPAD9",
+   "0x4A":"SUBTRACT",
+   "0x4B":"NUMPAD4",
+   "0x4C":"NUMPAD5",
+   "0x4D":"NUMPAD6",
+   "0x4E":"ADD",
+   "0x4F":"NUMPAD1",
+   "0x50":"NUMPAD2",
+   "0x51":"NUMPAD3",
+   "0x52":"NUMPAD0",
+   "0x53":"DECIMAL",
+   "0x56":"OEM_102",
+   "0x70":"KANA",
+   "0x73":"ABNT_C1",
+   "0x79":"CONVERT",
+   "0x7B":"NOCONVERT",
+   "0x7D":"YEN",
+   "0x7E":"ABNT_C2",
+   "0x8D":"NUMPADEQUALS",
+   "0x90":"PREVTRACK",
+   "0x91":"AT",
+   "0x92":"COLON",
+   "0x93":"UNDERLINE",
+   "0x94":"KANJI",
+   "0x95":"STOP",
+   "0x96":"AX",
+   "0x97":"UNLABELED",
+   "0x99":"NEXTTRACK",
+   "0x9C":"NUMPADENTER",
+   "0x9D":"RCONTROL",
+   "0xA0":"MUTE",
+   "0xA1":"CALCULATOR",
+   "0xA2":"PLAYPAUSE",
+   "0xA4":"MEDIASTOP",
+   "0xAE":"VOLUMEDOWN",
+   "0xB0":"VOLUMEUP",
+   "0xB2":"WEBHOME",
+   "0xB3":"NUMPADCOMMA",
+   "0xB5":"DIVIDE",
+   "0xB7":"SYSRQ",
+   "0xB8":"RMENU",
+   "0xC5":"PAUSE",
+   "0xC7":"HOME",
+   "0xC8":"UP",
+   "0xC9":"PRIOR",
+   "0xCB":"LEFT",
+   "0xCD":"RIGHT",
+   "0xCF":"END",
+   "0xD0":"DOWN",
+   "0xD1":"NEXT",
+   "0xD2":"INSERT",
+   "0xD3":"DELETE",
+   "0xDB":"LWIN",
+   "0xDC":"RWIN",
+   "0xDD":"APPS",
+   "0xDE":"POWER",
+   "0xDF":"SLEEP",
+   "0xE3":"WAKE",
+   "0xE5":"WEBSEARCH",
+   "0xE6":"WEBFAVORITES",
+   "0xE7":"WEBREFRESH",
+   "0xE8":"WEBSTOP",
+   "0xE9":"WEBFORWARD",
+   "0xEA":"WEBBACK",
+   "0xEB":"MYCOMPUTER",
+   "0xEC":"MAIL",
+   "0xED":"MEDIASELECT"
+}'''
 
-# Variables record
-record = config.get('record controls', 'record')
-stop = config.get('record controls', 'stop')
-play = config.get('record controls', 'play')
-next_record = config.get('record controls', 'next_record')
-prev_record = config.get('record controls', 'prev_record')
-random_play = config.get('record controls', 'random_play')
+data = json.loads(json_db)
+
+
+# Variables
+
+def mappingValue(dictDb, valueToFind):
+    for key, value in dictDb.items():
+        if key == conf_output[valueToFind]:
+            return value
+
+
+p1Up = mappingValue(data, 'P1 Up')
+p1Down = mappingValue(data, "P1 Down")
+p1Left = mappingValue(data, "P1 Left")
+p1Right = mappingValue(data, "P1 Right")
+p1A = mappingValue(data, "P1 Button A")
+p1B = mappingValue(data, "P1 Button B")
+p1C = mappingValue(data, "P1 Button C")
+p1D = mappingValue(data, "P1 Button D")
+p1Dummy = mappingValue(data, "P1 Select")
+p1Record = mappingValue(data, "P1 Coin")
+p1Play = mappingValue(data, "P1 Start")
+p2Up = mappingValue(data, "P2 Up")
+p2Down = mappingValue(data, "P2 Down")
+p2Left = mappingValue(data, "P2 Left")
+p2Right = mappingValue(data, "P2 Right")
+p2A = mappingValue(data, "P2 Button A")
+p2B = mappingValue(data, "P2 Button B")
+p2C = mappingValue(data, "P2 Button C")
+p2D = mappingValue(data, "P2 Button D")
+stop = "a"
+print("end mapping")
+
 
 def p1_to_p2():
     while True:
@@ -129,56 +288,25 @@ def p1_to_p2():
                 print('P2 START')
                 p1_to_p2()
 
+
 def dummy_record():
-    current_slot = 0
-    record_slots = []
-    for i in range(0, TOTAL_SLOTS):
-        record_slots.append(0)
+    global recorded
     while True:
         for event in get_gamepad():
             try:
-                if event.code == record and event.state > int(0):
+                if event.code == p1Record and event.state > int(0):
                     print('Record P2')
-                    print("Press the",stop, "button to quit record")
-                    record_slots[current_slot] = keyboard.record(until=stop)
-                    if len(record_slots[current_slot]) < 2:
-                        record_slots[current_slot] = 0
-                        print('Nothing recorded')
+                    print("Press the", stop, "button to quit record")
+                    recorded = keyboard.record(until=stop)
                     print('End record')
-                elif event.code == play and event.state > int(0):
-                    if record_slots[current_slot] != 0:
-                        print('Start replay', current_slot + 1)
-                        keyboard.play(record_slots[current_slot])
-                        print('End replay')
-                    else:
-                        print('This slot is empty')
-                elif event.code == random_play and event.state > int(0):
-                    found = False
-                    for i in range(0, TOTAL_SLOTS):
-                        if record_slots[i]:
-                            found = True
-                    if found:
-                        random_slot = randint(0, TOTAL_SLOTS-1)
-                        while not record_slots[random_slot]:
-                            random_slot = randint(0, TOTAL_SLOTS-1)
-                        print('Start random replay', random_slot + 1)
-                        keyboard.play(record_slots[random_slot])
-                        print('End replay')
-                    else:
-                        print('No slot is recorded')
-                elif event.code == prev_record and event.state > int(0):
-                    current_slot-=1
-                    if current_slot < 0:
-                        current_slot = TOTAL_SLOTS-1
-                    print('Switched to slot ', current_slot + 1)
-                elif event.code == next_record and event.state > int(0):
-                    current_slot+=1
-                    if current_slot > TOTAL_SLOTS-1:
-                        current_slot = 0
-                    print('Switched to slot ', current_slot + 1)
+                elif event.code == p1Play and event.state > int(0):
+                    print('Start replay')
+                    keyboard.play(recorded)
+                    print('End replay')
             except:
                 print("Nothing recorded")
                 pass
+
 
 if __name__ == '__main__':
     print(welcome)
