@@ -216,63 +216,63 @@ print("end mapping")
 def p1_to_p2():
     while True:
         events = get_gamepad()
-        for event in events:
-            # direction vers le bas
-            if event.code == p1Down:
-                if event.state == 1:
-                    print('Crouch!')
-                    pyautogui.keyDown(p2Down)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2Down)
-            # direction vers le haut
-            if event.code == p1Up:
-                if event.state == -1:
-                    print('Jump!')
-                    pyautogui.keyDown(p2Up)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2Up)
-            # direction vers la gauche
-            if event.code == p1Left:
-                if event.state == -1:
-                    print('Left!')
-                    pyautogui.keyDown(p2Left)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2Left)
-            # direction vers la droite
-            if event.code == p1Right:
-                if event.state == 1:
-                    print('Right!')
-                    pyautogui.keyDown(p2Right)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2Right)
-            # bouton A
-            if event.code == p1A:
-                if event.state > 0:
-                    print('A!')
-                    pyautogui.keyDown(p2A)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2A)
-            # bouton B
-            if event.code == p1B:
-                if event.state > 0:
-                    print('B!')
-                    pyautogui.keyDown(p2B)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2B)
-            # bouton C
-            if event.code == p1C:
-                if event.state > 0:
-                    print('C!')
-                    pyautogui.keyDown(p2C)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2C)
-            # bouton D
-            if event.code == p1D:
-                if event.state > 0:
-                    print('D!')
-                    pyautogui.keyDown(p2D)
-                elif event.state == 0:
-                    pyautogui.keyUp(p2D)
+        event = events[0]
+        # direction vers le bas
+        if event.code == p1Down:
+            if event.state == 1:
+                print('Crouch!')
+                pyautogui.keyDown(p2Down)
+            elif event.state == 0:
+                pyautogui.keyUp(p2Down)
+        # direction vers le haut
+        if event.code == p1Up:
+            if event.state == -1:
+                print('Jump!')
+                pyautogui.keyDown(p2Up)
+            elif event.state == 0:
+                pyautogui.keyUp(p2Up)
+        # direction vers la gauche
+        if event.code == p1Left:
+            if event.state == -1:
+                print('Left!')
+                pyautogui.keyDown(p2Left)
+            elif event.state == 0:
+                pyautogui.keyUp(p2Left)
+        # direction vers la droite
+        if event.code == p1Right:
+            if event.state == 1:
+                print('Right!')
+                pyautogui.keyDown(p2Right)
+            elif event.state == 0:
+                pyautogui.keyUp(p2Right)
+        # bouton A
+        if event.code == p1A:
+            if event.state > 0:
+                print('A!')
+                pyautogui.keyDown(p2A)
+            elif event.state == 0:
+                pyautogui.keyUp(p2A)
+        # bouton B
+        if event.code == p1B:
+            if event.state > 0:
+                print('B!')
+                pyautogui.keyDown(p2B)
+            elif event.state == 0:
+                pyautogui.keyUp(p2B)
+        # bouton C
+        if event.code == p1C:
+            if event.state > 0:
+                print('C!')
+                pyautogui.keyDown(p2C)
+            elif event.state == 0:
+                pyautogui.keyUp(p2C)
+        # bouton D
+        if event.code == p1D:
+            if event.state > 0:
+                print('D!')
+                pyautogui.keyDown(p2D)
+            elif event.state == 0:
+                pyautogui.keyUp(p2D)
         # stop p1 vers p2
         if event.code == p1Dummy and event.state > int(0):
             print('P2 STOP')
@@ -283,42 +283,44 @@ def p1_to_p2():
             pyautogui.keyUp(p2Right)
             break
     while True:
-        for event in get_gamepad():
-            if event.code == p1Dummy and event.state > int(0):
-                print('P2 START')
-                p1_to_p2()
+        events = get_gamepad()
+        event = events[0]
+        if event.code == p1Dummy and event.state > int(0):
+            print('P2 START')
+            p1_to_p2()
 
 
 def dummy_record():
-    global recorded
     while True:
-        for event in get_gamepad():
-            try:
-                if event.code == p1Record and event.state > int(0):
-                    print('Record P2')
-                    print("Press the", stop, "button to quit record")
-                    recorded = keyboard.record(until=stop)
-                    print('End record')
-                elif event.code == p1Play and event.state > int(0):
-                    print('Start replay')
-                    keyboard.play(recorded)
-                    print('End replay')
-            except:
-                print("Nothing recorded")
-                pass
+        events = get_gamepad()
+        event = events[0]
+        try:
+            if event.code == p1Record and event.state > int(0):
+                print('Record P2')
+                print("Press the", stop, "button to quit record")
+                recorded = keyboard.record(until=stop)
+                print('End record')
+            elif event.code == p1Play and event.state > int(0):
+                print('Start replay')
+                keyboard.play(recorded)
+                print('End replay')
+        except:
+            print("Nothing recorded")
+            pass
 
 
 if __name__ == '__main__':
     print(welcome)
     while True:
-        for event in get_gamepad():
-            if event.code == p1Dummy and event.state > int(0):
-                print('P2 START')
-                # p1_to_p2()
-                # dummy_record()
-                p = multiprocessing.Process(target=p1_to_p2)
-                q = multiprocessing.Process(target=dummy_record)
-                p.start()
-                q.start()
-                p.join()
-                q.join()
+        events = get_gamepad()
+        event = events[0]
+        if event.code == p1Dummy and event.state > int(0):
+            print('P2 START')
+            # p1_to_p2()
+            # dummy_record()
+            p = multiprocessing.Process(target=p1_to_p2)
+            q = multiprocessing.Process(target=dummy_record)
+            p.start()
+            q.start()
+            p.join()
+            q.join()
